@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model notifications {
+  id         Int                   @id(map: "notifications_pk") @default(autoincrement())
+  title      String                @db.VarChar(100)
+  body       Json                  @db.Json
+  createdAt DateTime              @default(now()) @map("created_at") @db.Date
+  status     notification_statuses @default(info)
+}
+
+enum notification_statuses {
+  critical
+  warning
+  success
+  info
+}
