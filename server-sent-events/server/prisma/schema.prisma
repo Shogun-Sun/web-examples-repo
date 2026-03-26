@@ -7,11 +7,18 @@ datasource db {
 }
 
 model notifications {
-  id         Int                   @id(map: "notifications_pk") @default(autoincrement())
-  title      String                @db.VarChar(100)
-  body       Json                  @db.Json
+  id        Int                   @id(map: "notifications_pk") @default(autoincrement())
+  title     String                @db.VarChar(100)
+  body      Json                  @db.Json
   createdAt DateTime              @default(now()) @map("created_at") @db.Date
-  status     notification_statuses @default(info)
+  status    notification_statuses @default(info)
+}
+
+model users {
+  id       Int    @id(map: "users_pk") @default(autoincrement())
+  name     String @db.VarChar
+  email    String @unique(map: "users_pk_2") @db.VarChar
+  password String
 }
 
 enum notification_statuses {

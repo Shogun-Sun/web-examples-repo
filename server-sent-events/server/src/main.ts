@@ -1,12 +1,13 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ValidationPipe } from '@nestjs/common';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('/api');
 
+  app.enableCors();
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -15,8 +16,10 @@ async function bootstrap() {
     }),
   );
 
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+
   const swaggerDocument = new DocumentBuilder()
-    .setTitle('Система уведомлений, графиков и прочее')
+    .setTitle('Server-Sent Events')
     .setVersion('1.0.0')
     .setDescription('Примеры запросов')
     .build();
