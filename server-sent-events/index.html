@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SSE Notifications</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+        background: #f4f4f9;
+      }
+      #list {
+        list-style: none;
+        padding: 0;
+      }
+      .notification {
+        background: white;
+        margin-bottom: 10px;
+        padding: 15px;
+        border-left: 5px solid #007bff;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .type-info {
+        border-left-color: #17a2b8;
+      }
+      .type-error {
+        border-left-color: #dc3545;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Живые уведомления 🔔</h1>
+    <div id="status">Подключение...</div>
+    <ul id="list"></ul>
+
+    <script>
+      // 1. Создаем подключение к твоему контроллеру
+      const eventSource = new EventSource(
+        "http://localhost:3001/api/notifications/sse",
+      );
+      const list = document.getElementById("list");
+      const status = document.getElementById("status");
+
+      // Отслеживаем открытие соединения
+      eventSource.onopen = () => {
+        status.innerText = "✅ Соединение установлено";
+        status.style.color = "green";
+      };
+
+      // 2. Слушаем входящие сообщения
+      // В NestJS MessageEvent.data приходит как строка, поэтому делаем JSON.parse
+      eventSource.onmessage = (event) => {
+        const notification = JSON.parse(event.data);
+        addNotificationToList(notification);
+      };
+
+      // 3. Обработка ошибок (например, сервер выключился)
+      eventSource.onerror = () => {
+        status.innerText = "❌ Ошибка подключения. Переподключение...";
+        status.style.color = "red";
+      };
+
+      eventSource.addEventListener("info", (event) => {
+        const notification = JSON.parse(event.data);
+        addNotificationToList(notification);
+      });
+
+      function addNotificationToList(data) {
+        const li = document.createElement("li");
+        li.className = `notification type-${data.status || "info"}`;
+        li.innerHTML = `
+                <strong>ID: ${data.id}</strong><br>
+                <span>${data.message || "Новое событие"}</span>
+            `;
+        list.prepend(li); // Добавляем новое уведомление в начало списка
+      }
+    </script>
+  </body>
+</html>

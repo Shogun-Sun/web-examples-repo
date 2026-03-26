@@ -26,7 +26,7 @@ export class NotificationsController {
       map(
         (notification): MessageEvent => ({
           id: notification.id.toString(),
-          type: notification.status,
+          type: 'notifications',
           data: notification,
           retry: 5000,
         }),
