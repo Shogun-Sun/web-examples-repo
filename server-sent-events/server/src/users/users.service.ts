@@ -3,14 +3,29 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserEntity } from './entities/user.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
+    if (process.env.SALT_ROUNDS == null) {
+      throw new Error('Не указан уровень шифрования пароля');
+      return;
+    }
+
+    const hashedPasswotrd = await bcrypt.hash(
+      createUserDto.password,
+      Number(process.env.SALT_ROUNDS),
+    );
+
     const data = await this.prismaService.users.create({
-      data: createUserDto,
+      data: {
+        password: hashedPasswotrd,
+        email: createUserDto.email,
+        name: createUserDto.name,
+      },
     });
 
     return data;

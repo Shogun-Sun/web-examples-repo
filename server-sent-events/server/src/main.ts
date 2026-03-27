@@ -22,6 +22,17 @@ async function bootstrap() {
     .setTitle('Server-Sent Events')
     .setVersion('1.0.0')
     .setDescription('Примеры запросов')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter accessToken',
+        in: 'header',
+      },
+      'access-token',
+    )
     .build();
 
   const swaggerFactory = SwaggerModule.createDocument(app, swaggerDocument);

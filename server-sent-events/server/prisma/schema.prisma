@@ -15,10 +15,20 @@ model notifications {
 }
 
 model users {
-  id       Int    @id(map: "users_pk") @default(autoincrement())
-  name     String @db.VarChar
-  email    String @unique(map: "users_pk_2") @db.VarChar
+  id       Int        @id(map: "users_pk") @default(autoincrement())
+  name     String     @db.VarChar
+  email    String     @unique(map: "users_pk_2") @db.VarChar
   password String
+  sessions sessions[]
+}
+
+model sessions {
+  id           Int      @id(map: "sessions_pk") @default(autoincrement())
+  refreshToken String   @unique(map: "sessions_pk_2") @map("refresh_token")
+  userId       Int      @map("user_id")
+  deviceInfo   String   @map("device_info")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  users        users    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "sessions_users_id_fk")
 }
 
 enum notification_statuses {
