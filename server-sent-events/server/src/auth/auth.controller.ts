@@ -5,15 +5,16 @@ import {
   Headers,
   UseGuards,
   Get,
+  Delete,
+  Param,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { Public } from './decorators/public.decorator';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { TokensEntity } from './entities/tokens.entity';
-import { AuthGuard } from '@nestjs/passport';
-import { AtGuard } from './guards/at.guard';
 import { RtGuard } from './guards/rt.guard';
+import { GetCurrentUser } from './decorators/get-current-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -32,6 +33,18 @@ export class AuthController {
   }
 
   @UseGuards(RtGuard)
+  @ApiBearerAuth('refresh-token')
   @Get('refresh')
-  refresh() {}
+  async refresh(
+    @GetCurrentUser('userId') userId: number,
+    @GetCurrentUser('refreshToken') oldToken: string,
+  ) {
+    return await this.authService.updateRefreshToken(userId, oldToken);
+  }
+
+  @ApiBearerAuth('access-token')
+  @Delete('reset/:userId')
+  async resetSessions(@Param('userId') userId: string) {
+    return await this.authService.resetAllSessions(Number(userId));
+  }
 }

@@ -10,6 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { TokensEntity } from './entities/tokens.entity';
+import { PayloadEntity } from './entities/payload.entity';
 
 @Injectable()
 export class AuthService {
@@ -36,6 +37,11 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new BadRequestException('Неверный email или пароль');
     }
+
+    await this.prismaService.users.update({
+      where: { email: user.email },
+      data: { sessionVersion: 0 },
+    });
     const tokens = new TokensEntity(await this.genTokens(user.id));
     const hashedRefresh = await bcrypt.hash(
       tokens.refreshToken,
@@ -81,7 +87,8 @@ export class AuthService {
   async genTokens(userId: number) {
     const jwtPayload = {
       userId: userId,
-    };
+      sessionVersion: 0,
+    } as PayloadEntity;
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(jwtPayload, {
@@ -104,5 +111,18 @@ export class AuthService {
       throw new Error('Не указано количество операций при хешировании');
 
     return await bcrypt.hash(token, saltRounds);
+  }
+
+  async resetAllSessions(userId: number) {
+    const user = await this.prismaService.users.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) throw new UnauthorizedException('Пользователь не авторизован');
+
+    await this.prismaService.users.update({
+      where: { id: userId },
+      data: { sessionVersion: Number(user.sessionVersion) + 1 },
+    });
   }
 }

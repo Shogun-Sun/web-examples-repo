@@ -15,11 +15,12 @@ model notifications {
 }
 
 model users {
-  id       Int        @id(map: "users_pk") @default(autoincrement())
-  name     String     @db.VarChar
-  email    String     @unique(map: "users_pk_2") @db.VarChar
-  password String
-  sessions sessions[]
+  id              Int        @id(map: "users_pk") @default(autoincrement())
+  name            String     @db.VarChar
+  email           String     @unique(map: "users_pk_2") @db.VarChar
+  password        String
+  sessionVersion Int        @default(0) @map("session_version")
+  sessions        sessions[]
 }
 
 model sessions {

@@ -10,8 +10,9 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
-import { UserEntity } from './entities/user.entity';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import { Public } from 'src/auth/decorators/public.decorator';
+import { UserDto } from './dto/user.dto';
 
 @ApiBearerAuth('access-token')
 @Controller('users')
@@ -19,13 +20,15 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @Public()
+  @ApiOperation({ security: [] })
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
   @ApiOkResponse({
     description: 'Список пользователь успешно получен',
-    type: UserEntity,
+    type: UserDto,
     isArray: true,
   })
   @Get()

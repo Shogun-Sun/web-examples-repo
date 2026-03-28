@@ -33,6 +33,17 @@ async function bootstrap() {
       },
       'access-token',
     )
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter refreshToken',
+        in: 'header',
+      },
+      'refresh-token',
+    )
     .build();
 
   const swaggerFactory = SwaggerModule.createDocument(app, swaggerDocument);

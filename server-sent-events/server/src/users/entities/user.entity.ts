@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import { IsEmail, IsString, MaxLength } from 'class-validator';
 
 export class UserEntity {
@@ -18,7 +19,7 @@ export class UserEntity {
     description: 'Имя пользователя',
     example: ' Иван',
     minLength: 5,
-    maxLength: 50,
+    maxLength: 30,
   })
   name: string;
 
@@ -31,6 +32,7 @@ export class UserEntity {
   email: string;
 
   @IsString()
+  @Exclude({ toPlainOnly: true })
   @ApiProperty({
     description: 'Пароль пользователя',
     example: '123456789',
